@@ -1,7 +1,11 @@
-const  express= require('express')
+const express = require('express')
+exports.sendTweets = async(req,res)=>{
+const {createUser,validUser,sendTweets,deleteTweet,getAllTweetsByUser,sample} = require('./../Controllers/UserController.js')
 const router = express.Router();
-const {signup,signin,getAllUsers} = require('./../controllers/userController.js');
-router.post('/',signup)
-router.post('/validate',signin)
-router.get('/users/:_id',getAllUsers)
+router.post('/newUser',createUser)
+router.post('/validUser',validUser)
+router.get('/',sample)
+router.post('/sendTweets/:id',sendTweets)
+router.delete('/deleteTweet/:id',deleteTweet)
+router.get('/getAllTweetsByUser/:id',getAllTweetsByUser)
 module.exports = router

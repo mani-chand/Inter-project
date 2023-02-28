@@ -1,57 +1,75 @@
-const User = require('./../models/userModel.js')
-const bcrypt = require("bcrypt")
-const signup=async (req,res,next)=>{
-    try{
-        const {username,email,number}=req.body
-        const Euser = await User.findOne({email})
-        const Uuser = await User.findOne({username})
-        //console.log(Uuser,Euser)
-        if(Euser !==null || Uuser !==null){
-            return res.send("user already exists").status(422)
+const userModel = require('./../Models/UserModel.js')
+const tweetModel = require('./../Models/TweetModel.js')
+const bcrypt = require('bcrypt')
+exports.createUser=async(req,res)=>{
+try {
+    const {name,email,password,age,gender,mobileNumber} = req.body
+    const user =  await userModel.findOne({email:email})
+    if(user){
+        res.status(400).send({message:'user already found with this email'})
+    }
+    const newUser = await userModel({
+        name,
+        email,
+        password,
+        age,
+        gender,
+        mobileNumber
+    }).save()
+    return res.status(200).json({newUser})
+} catch (error) {
+}
+}
+exports.validUser = async(req,res)=>{
+    try {
+        const {email,password} = req.body
+        const user = await userModel.findOne({email:email})
+        if(!user){
+            res.status(400).send({message:'user not found'})
+        }
+        const valid = bcrypt.compare(password,user.password)
+        if(valid){
+            return res.status(200).json({user})
         }
         else{
-            const password = await bcrypt.hash(req.body.password, 10)
-            const newUser = await User({
-                username,
-                email,
-                password,
-                number
-            }).save()
-            return res.send("created user").status(201)
+            res.status(400).send({message:'invalid password or email'})
         }
-    }catch(err){
-        return res.send("server error").status(500)
+    }catch(error){}
+}
+exports.sendTweets = async(req,res)=>{
+    try {
+    const id = req.params
+    const {message,file} = req.body
+    const user = await userModel.findOne({_id:id})
+    if(!user){}
+    const newTweet = await tweetModel({
+        id,
+        message,
+        file
+    }).save()
+    return res.status(200).json({newTweet})
+    } catch (error) {
+        
     }
 }
-const signin = async (req,res,next) =>{
-       const {email,password} = req.body 
-       try{
-           var user = await User.findOne({email})
-           //console.log(user)
-           if(user===null){
-               return res.send("user does not exist")
-            }   
-            const result = await bcrypt.compare(password, user.password);
-            delete user.password;
-            //console.log(user)
-           if(result){
-            return res.send(user)
-           }
-           else{
-           return res.send("password is incorrect")
-           }
-        }
-       catch{}
+exports.deleteTweet = async(req,res)=>{
+   try {
+    const id = req.params
+    const deletedTweet = await tweetModel().findOneAndDelete({_id:id})
+    return res.send(deletedTweet).status(200)
+   } catch (error) {
+    
+   }
 }
-const getAllUsers =async (req,res,next) => {
-    const id = req.params['_id'] 
-    try{
-        const users = await User.find({_id:{$ne:id}},{username:1})
-        return res.send(JSON.stringify(users))
-    }catch(err){
-
-    }
+exports.getAllTweetsByUser =  async(req,res)=>{
+   try {
+    const id = req.params
+    const tweets = await tweetModel().find({uid:id}).exec()
+    return res.send(tweets).status(200)
+   } catch (error) {
+    
+   }
 }
-exports.signup=signup
-exports.signin=signin
-exports.getAllUsers=getAllUsers
+exports.sample=async(req,res)=>{
+    res.send("helloworld")
+}

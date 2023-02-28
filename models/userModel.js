@@ -1,22 +1,11 @@
 const mongoose = require('mongoose')
+const { tweets } = require('../Controllers/UserController')
 const userSchema = mongoose.Schema({
-    username:{
-        type:String,
-        required: true,
-        unique: true
-    },
-    email:{
-        type:String,
-        required: true,
-        unique: true  
-    },
-    password:{
-        type:String,
-        required: true,  
-    },
-    number:{
-        type:String,
-        required: true,  
-    }
+    name: {type: String,required:true},
+    email:{type: String,required:true,unique:true},
+    password:{type: String,required:true},
+    age:{type:Number,required:true},
+    gender:{type:String,required:true},
+    mobileNumber:{type:Number,required:true},
 })
-module.exports = mongoose.model('users', userSchema)
+module.exports = new mongoose.model('user',userSchema)
